@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>User Profile</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'update_profile' %}">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" value="{{ user.email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" name="phone" value="{{ user.phone }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Skype ID</label>
+                            <input type="text" class="form-control" name="skype_id" value="{{ user.skype_id }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">WhatsApp Number</label>
+                            <input type="text" class="form-control" name="whatsapp_number" value="{{ user.whatsapp_number }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            {% if user.user_type == 'student' %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Enrolled Courses ({{ enrolled_courses.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% for enrollment in enrolled_courses %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ enrollment.course.title }}</span>
+                        <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                    {% empty %}
+                    <p>No courses enrolled yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.user_type == 'trainer' %}
+            <div class="card">
+                <div class="card-header">
+                    <h5>Trainer Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Courses:</strong> {{ courses.count }}</p>
+                    <p><strong>Average Rating:</strong> {{ avg_rating|default:"No ratings yet" }}</p>
+                    <p><strong>Total Ratings:</strong> {{ received_ratings.count }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

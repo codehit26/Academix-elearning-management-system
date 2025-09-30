@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ trainer.get_full_name|default:trainer.username }} - Trainer - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 text-center">
+
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                        <i class="fas fa-chalkboard-teacher text-white fa-2x"></i>
+                    </div>
+
+
+                    <h3 class="fw-bold text-dark mb-2">{{ trainer.get_full_name|default:trainer.username }}</h3>
+                    <p class="text-muted mb-4">Professional Trainer</p>
+
+
+                    <div class="text-start">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-envelope text-primary me-3" style="width: 20px;"></i>
+                            <div>
+                                <small class="text-muted">Email</small>
+                                <p class="mb-0 fw-semibold">{{ trainer.email }}</p>
+                            </div>
+                        </div>
+
+                        {% if trainer.phone %}
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-phone text-primary me-3" style="width: 20px;"></i>
+                            <div>
+                                <small class="text-muted">Phone</small>
+                                <p class="mb-0 fw-semibold">{{ trainer.phone }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if trainer.skype_id %}
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fab fa-skype text-primary me-3" style="width: 20px;"></i>
+                            <div>
+                                <small class="text-muted">Skype</small>
+                                <p class="mb-0 fw-semibold">{{ trainer.skype_id }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+
+                        <div class="border-top pt-3 mt-3">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <h5 class="fw-bold text-primary mb-1">{{ courses|length }}</h5>
+                                    <small class="text-muted">Courses</small>
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="fw-bold text-primary mb-1">{{ total_students|default:"0" }}</h5>
+                                    <small class="text-muted">Students</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {% if user.user_type == 'student' %}
+                    <div class="border-top pt-4 mt-4">
+                        <h5 class="fw-bold text-dark mb-3">Rate this Trainer</h5>
+                        <form method="post" action="{% url 'rate_trainer' trainer.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <select name="rating" class="form-select" required>
+                                    <option value="">Select rating</option>
+                                    <option value="5">★★★★★ - Excellent</option>
+                                    <option value="4">★★★★ - Very Good</option>
+                                    <option value="3">★★★ - Good</option>
+                                    <option value="2">★★ - Fair</option>
+                                    <option value="1">★ - Poor</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <textarea name="comment" class="form-control" placeholder="Share your experience with this trainer..." rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-star me-2"></i>Submit Rating
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            {% if trainer_rating %}
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-4 text-center">
+                    <h5 class="fw-bold text-dark mb-3">Trainer Rating</h5>
+                    <div class="display-4 fw-bold text-primary mb-2">{{ trainer_rating.avg_rating|floatformat:1 }}</div>
+                    <div class="text-warning mb-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= trainer_rating.avg_rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">Based on {{ trainer_rating.total_ratings }} rating{{ trainer_rating.total_ratings|pluralize }}</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="fw-bold text-dark mb-2">
+                                Courses by {{ trainer.get_full_name|default:trainer.username }}
+                            </h4>
+                            <p class="text-muted mb-0">Explore all courses created by this trainer</p>
+                        </div>
+                        <span class="badge bg-primary fs-6">{{ courses|length }} course{{ courses|length|pluralize }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if courses %}
+
+            <div class="row g-4">
+                {% for course in courses %}
+                <div class="col-xl-6">
+                    <div class="card border-0 shadow-sm h-100 course-card">
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge bg-primary">{{ course.category.name }}</span>
+                                <span class="text-success fw-bold">${{ course.price }}</span>
+                            </div>
+
+
+                            <h5 class="card-title fw-bold text-dark mb-3">{{ course.title }}</h5>
+                            <p class="card-text text-muted mb-3">{{ course.description|truncatewords:20 }}</p>
+
+
+                            <div class="course-meta mb-4">
+                                <div class="d-flex justify-content-between align-items-center text-muted small">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-clock me-1"></i>
+                                        <span>{{ course.duration }} hours</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-play-circle me-1"></i>
+                                        <span>{{ course.videos.count }} videos</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-users me-1"></i>
+                                        <span>{{ course.student_count }} students</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            {% if course.avg_rating %}
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="text-warning me-2">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= course.avg_rating %}★{% else %}☆{% endif %}
+                                    {% endfor %}
+                                </span>
+                                <small class="text-muted">({{ course.rating_count }})</small>
+                            </div>
+                            {% endif %}
+                        </div>
+
+
+                        <div class="card-footer bg-transparent border-0 pt-0 px-4 pb-4">
+                            <div class="d-grid">
+                                <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">
+                                    <i class="fas fa-eye me-2"></i>View Course Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-chalkboard-teacher fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted mb-3">No Courses Available</h4>
+                    <p class="text-muted mb-4">This trainer hasn't created any courses yet.</p>
+                    <a href="{% url 'course_list' %}" class="btn btn-primary">
+                        <i class="fas fa-book me-2"></i>Browse All Courses
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+
+            {% if recent_reviews %}
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-comments me-2 text-primary"></i>Recent Reviews
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for review in recent_reviews %}
+                        <div class="col-12">
+                            <div class="border-start border-3 border-primary ps-3 py-2">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong>{{ review.student.username }}</strong>
+                                    <span class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                {% if review.comment %}
+                                <p class="text-muted mb-2">{{ review.comment }}</p>
+                                {% endif %}
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ review.created_at|timesince }} ago
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.course-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.badge {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    padding: 0.5em 0.8em;
+}
+
+.course-meta {
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0.75rem 0;
+}
+
+.border-start {
+    border-left: 3px solid #667eea !important;
+}
+</style>
+{% endblock %}

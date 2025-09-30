@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-1">Dashboard</h1>
+                    <p class="text-muted mb-0">
+                        Welcome back, <span class="fw-semibold">{{ user.get_full_name|default:user.username }}</span>
+                        <span class="badge bg-primary ms-2">{{ user.get_user_type_display }}</span>
+                    </p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Last login: {{ user.last_login|date:"M d, Y H:i"|default:"First time" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% if user.user_type == 'student' %}
+    <div class="row">
+
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>My Learning Progress
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if progress_data %}
+                    <div class="row g-4">
+                        {% for progress in progress_data %}
+                        <div class="col-xl-6">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="card-title fw-bold text-dark">{{ progress.course.title }}</h5>
+                                        <span class="badge bg-primary">{{ progress.progress|floatformat:1 }}%</span>
+                                    </div>
+
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-primary"
+                                             role="progressbar"
+                                             style="width: {{ progress.progress }}%">
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                                        <span>{{ progress.completed_videos }} of {{ progress.total_videos }} videos completed</span>
+                                        <span>{{ progress.course.duration }}h total</span>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <a href="{% url 'course_detail' progress.course.id %}" class="btn btn-primary">
+                                            <i class="fas fa-play-circle me-2"></i>
+                                            {% if progress.progress == 0 %}Start Learning{% else %}Continue Learning{% endif %}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Courses Yet</h4>
+                        <p class="text-muted mb-4">You haven't enrolled in any courses yet. Start your learning journey today!</p>
+                        <a href="{% url 'course_list' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Browse Courses
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        {% if progress_data %}
+        <div class="col-12">
+            <div class="row g-3">
+                <div class="col-md-3 d-flex">
+                    <div class="card border-0 bg-primary text-white w-100">
+                        <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                            <i class="fas fa-book fa-2x mb-2 opacity-75"></i>
+                            <h3 class="mb-0">{{ progress_data|length }}</h3>
+                            <p class="mb-0 small">Enrolled Courses</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <div class="card border-0 bg-success text-white w-100">
+                        <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                            <i class="fas fa-check-circle fa-2x mb-2 opacity-75"></i>
+                            <h3 class="mb-0">{{ progress_data|length }}</h3>
+                            <p class="mb-0 small">Active Courses</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <div class="card border-0 bg-info text-white w-100">
+                        <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                            <i class="fas fa-play-circle fa-2x mb-2 opacity-75"></i>
+                            <h3 class="mb-0">
+                                {% with total_videos=progress_data.0.total_videos total_completed=progress_data.0.completed_videos %}
+                                {% if total_videos > 0 %}
+                                    {{ total_completed|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                                {% endwith %}
+                            </h3>
+                            <p class="mb-0 small">Overall Progress</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <div class="card border-0 bg-warning text-white w-100">
+                        <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                            <i class="fas fa-clock fa-2x mb-2 opacity-75"></i>
+                            <h3 class="mb-0">
+                                {% with total_duration=0 %}
+                                    {% for progress in progress_data %}
+                                        {% widthratio progress.course.duration 1 progress.progress as course_hours %}
+                                        {{ total_duration|add:course_hours }}
+                                    {% endfor %}
+                                    {{ total_duration|default:"0" }}
+                                {% endwith %}
+                            </h3>
+                            <p class="mb-0 small">Study Hours</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+
+    {% elif user.user_type == 'trainer' %}
+    <div class="row">
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-0">
+                            <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>My Courses
+                        </h4>
+                        <span class="badge bg-primary">{{ courses|length }} courses</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                    <div class="row g-4">
+                        {% for course in courses %}
+                        <div class="col-xl-4 col-lg-6">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold text-dark mb-2">{{ course.title }}</h5>
+                                    <p class="card-text text-muted small mb-3">{{ course.description|truncatewords:15 }}</p>
+
+                                    <div class="row text-center mb-3">
+                                        <div class="col-4">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-0 text-primary">{{ course.enrolled_students }}</h6>
+                                                <small class="text-muted">Students</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-0 text-primary">{{ course.videos.count }}</h6>
+                                                <small class="text-muted">Videos</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-0 text-primary">{{ course.duration }}h</h6>
+                                                <small class="text-muted">Duration</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'course_students' course.id %}" class="btn btn-primary">
+                                            <i class="fas fa-users me-2"></i>View Students
+                                        </a>
+                                        <a href="{% url 'add_video' course.id %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-plus me-2"></i>Add Video
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Courses Assigned</h4>
+                        <p class="text-muted mb-4">You haven't been assigned to any courses yet.</p>
+                        <a href="{% url 'course_list' %}" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View All Courses
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% elif user.user_type == 'manager' %}
+    <div class="row">
+
+        <div class="col-12 mb-4">
+            <div class="row g-3">
+                <div class="col-xl-3 col-md-6 d-flex">
+                    <div class="card border-0 bg-primary text-white shadow-sm w-100">
+                        <div class="card-body p-4 d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="fw-bold mb-0">{{ total_courses }}</h3>
+                                    <p class="mb-0 opacity-75">Total Courses</p>
+                                </div>
+                                <i class="fas fa-book fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 d-flex">
+                    <div class="card border-0 bg-success text-white shadow-sm w-100">
+                        <div class="card-body p-4 d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="fw-bold mb-0">{{ total_students }}</h3>
+                                    <p class="mb-0 opacity-75">Total Students</p>
+                                </div>
+                                <i class="fas fa-users fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 d-flex">
+                    <div class="card border-0 bg-warning text-white shadow-sm w-100">
+                        <div class="card-body p-4 d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="fw-bold mb-0">{{ total_trainers }}</h3>
+                                    <p class="mb-0 opacity-75">Total Trainers</p>
+                                </div>
+                                <i class="fas fa-chalkboard-teacher fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 d-flex">
+                    <div class="card border-0 bg-info text-white shadow-sm w-100">
+                        <div class="card-body p-4 d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="fw-bold mb-0">${{ total_revenue|default:0 }}</h3>
+                                    <p class="mb-0 opacity-75">Total Revenue</p>
+                                </div>
+                                <i class="fas fa-dollar-sign fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-history me-2 text-primary"></i>Recent Payments
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if recent_payments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Course</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in recent_payments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                <i class="fas fa-user text-white small"></i>
+                                            </div>
+                                            {{ payment.student.username }}
+                                        </div>
+                                    </td>
+                                    <td>{{ payment.course.title }}</td>
+                                    <td><span class="fw-bold text-success">${{ payment.amount }}</span></td>
+                                    <td>{{ payment.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if payment.payment_status == 'completed' %}success{% else %}warning{% endif %}">
+                                            {{ payment.payment_status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Recent Payments</h5>
+                        <p class="text-muted">Payment records will appear here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+.d-flex .card {
+    height: 100%;
+}
+
+
+.card-body.text-center.py-4 {
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+</style>
+{% endblock %}

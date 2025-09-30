@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Advance Your Skills with Professional Courses</h1>
+                <p class="lead mb-4">Join thousands of learners advancing their careers with our comprehensive online learning platform. Master new skills at your own pace.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'course_list' %}" class="btn btn-light btn-lg px-4 py-2 fw-bold">
+                        Browse Courses <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4 py-2">
+                        Start Learning Free
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="mt-4 d-flex align-items-center text-light">
+                    <div class="me-4">
+                        <h4 class="mb-0 fw-bold">50K+</h4>
+                        <small>Active Learners</small>
+                    </div>
+                    <div class="me-4">
+                        <h4 class="mb-0 fw-bold">200+</h4>
+                        <small>Quality Courses</small>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">98%</h4>
+                        <small>Satisfaction Rate</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'images/undraw_online-learning_tgmv.svg' %}" alt="Online Learning" class="img-fluid" style="max-height: 400px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Why Learn With Us?</h2>
+                <p class="text-muted lead">Experience the difference with our student-focused approach</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-primary bg-gradient rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-rocket text-white fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Career-Focused</h5>
+                        <p class="text-muted">Courses designed to help you advance in today's competitive job market</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-success bg-gradient rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-laptop-code text-white fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Hands-on Learning</h5>
+                        <p class="text-muted">Practical projects and real-world applications to build your portfolio</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-info bg-gradient rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-clock text-white fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Learn at Your Pace</h5>
+                        <p class="text-muted">Flexible scheduling that fits your lifestyle and commitments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-center mb-3">Featured Courses</h2>
+                <p class="text-muted text-center lead">Explore our most popular learning paths</p>
+            </div>
+        </div>
+
+        {% if featured_courses %}
+        <div class="row g-4">
+            {% for course in featured_courses|slice:":3" %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card course-card h-100 shadow-sm border-0">
+                    <div class="card-img-top bg-secondary" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-book-open text-white fa-3x"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary">{{ course.category.name }}</span>
+                            <span class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </span>
+                        </div>
+                        <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                        <p class="card-text text-muted">{{ course.description|truncatewords:20 }}</p>
+                        <div class="course-meta d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <span class="fw-bold text-primary h5 mb-0">${{ course.price }}</span>
+                            </div>
+                            <div class="text-muted">
+                                <small class="me-3">
+                                    <i class="fas fa-clock me-1"></i>{{ course.duration }}h
+                                </small>
+                                <small>
+                                    <i class="fas fa-users me-1"></i>{{ course.student_count }} students
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pt-0">
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-primary w-100">Explore Course</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'course_list' %}" class="btn btn-outline-primary btn-lg">
+                View All Courses <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <div class="alert alert-info">
+                <h5>Courses Coming Soon!</h5>
+                <p class="mb-0">We're preparing amazing learning content for you.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Popular Learning Paths</h2>
+                <p class="text-muted lead">Structured paths to master in-demand skills</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 text-center h-100">
+                    <div class="card-body">
+                        <div class="text-primary mb-3">
+                            <i class="fas fa-code fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Web Development</h5>
+                        <p class="text-muted small">Frontend, backend, and full-stack development courses</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 text-center h-100">
+                    <div class="card-body">
+                        <div class="text-success mb-3">
+                            <i class="fas fa-chart-bar fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Data Science</h5>
+                        <p class="text-muted small">Python, machine learning, and data analysis</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 text-center h-100">
+                    <div class="card-body">
+                        <div class="text-info mb-3">
+                            <i class="fas fa-paint-brush fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Design</h5>
+                        <p class="text-muted small">UI/UX, graphic design, and creative tools</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 text-center h-100">
+                    <div class="card-body">
+                        <div class="text-warning mb-3">
+                            <i class="fas fa-bullhorn fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Marketing</h5>
+                        <p class="text-muted small">Digital marketing, SEO, and social media</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="fw-bold mb-3">Start Your Learning Journey Today</h3>
+                <p class="lead mb-0">Join our community of passionate learners and transform your career.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4">
+                    Get Started Free
+                </a>
+                {% else %}
+                <a href="{% url 'course_list' %}" class="btn btn-light btn-lg px-4">
+                    Continue Learning
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.course-card {
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .feature-icon {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}

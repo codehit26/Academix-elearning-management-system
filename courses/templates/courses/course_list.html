@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Courses - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-2">Available Courses</h1>
+                    <p class="text-muted mb-0">Discover our comprehensive learning programs designed for your success</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">{{ courses|length }} course{{ courses|length|pluralize }} available</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100 course-card">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary">{{ course.category.name }}</span>
+                        <span class="text-success fw-bold fs-5">${{ course.price }}</span>
+                    </div>
+
+
+                    <h5 class="card-title fw-bold text-dark mb-3">{{ course.title }}</h5>
+                    <p class="card-text text-muted mb-3">{{ course.description|truncatewords:25 }}</p>
+
+
+                    <div class="course-meta mb-4">
+                        <div class="d-flex justify-content-between align-items-center text-muted small">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clock me-1"></i>
+                                <span>{{ course.duration }} hours</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-play-circle me-1"></i>
+                                <span>{{ course.videos.count }} videos</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users me-1"></i>
+                                <span>{{ course.student_count }} students</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="trainer-info d-flex align-items-center mb-3">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                            <i class="fas fa-user text-primary small"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted">By {{ course.trainer.get_full_name|default:course.trainer.username }}</small>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card-footer bg-transparent border-0 pt-0 px-4 pb-4">
+                    <div class="d-grid">
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View Course Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-book-open fa-4x text-muted mb-4"></i>
+                    <h3 class="text-muted mb-3">No Courses Available</h3>
+                    <p class="text-muted mb-4">We're currently preparing new courses. Please check back later for updates.</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Return to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    {% if courses|length >= 6 %}
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <div class="card border-0 bg-light">
+                <div class="card-body py-4">
+                    <p class="text-muted mb-3">Showing {{ courses|length }} of {{ total_courses }} courses</p>
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-sync me-2"></i>Load More Courses
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.course-card {
+    border-radius: 12px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    border: 1px solid #667eea;
+    color: #667eea;
+    border-radius: 8px;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.8em;
+    border-radius: 6px;
+}
+
+.course-meta {
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0.75rem 0;
+}
+
+.trainer-info {
+    border-top: 1px solid #f8f9fa;
+    padding-top: 0.75rem;
+}
+
+
+@media (max-width: 768px) {
+    .course-meta .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: start !important;
+    }
+
+    .course-card {
+        margin-bottom: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

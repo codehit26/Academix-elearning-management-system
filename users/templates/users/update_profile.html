@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Profile - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-1">Update Profile</h1>
+                    <p class="text-muted">Manage your personal information and preferences</p>
+                </div>
+                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                </a>
+            </div>
+
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                        <i class="fas
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                            {% else %}fa-info-circle{% endif %} me-2">
+                        </i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post" id="profileForm">
+                        {% csrf_token %}
+
+
+                        <div class="mb-5">
+                            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                                <i class="fas fa-user-circle me-2 text-primary"></i>Personal Information
+                            </h5>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-user text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               name="username"
+                                               value="{{ form.username.value|default:user.username }}"
+                                               class="form-control border-start-0"
+                                               maxlength="150"
+                                               required
+                                               id="id_username">
+                                    </div>
+                                    {% if form.username.errors %}
+                                        <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-envelope text-muted"></i>
+                                        </span>
+                                        <input type="email"
+                                               name="email"
+                                               value="{{ form.email.value|default:user.email }}"
+                                               class="form-control border-start-0"
+                                               required
+                                               id="id_email">
+                                    </div>
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">First Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-signature text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               name="first_name"
+                                               value="{{ form.first_name.value|default:user.first_name }}"
+                                               class="form-control border-start-0"
+                                               maxlength="30"
+                                               id="id_first_name"
+                                               placeholder="Your first name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Last Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-signature text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               name="last_name"
+                                               value="{{ form.last_name.value|default:user.last_name }}"
+                                               class="form-control border-start-0"
+                                               maxlength="150"
+                                               id="id_last_name"
+                                               placeholder="Your last name">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-phone text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               name="phone"
+                                               value="{{ form.phone.value|default:user.phone }}"
+                                               class="form-control border-start-0"
+                                               maxlength="15"
+                                               id="id_phone"
+                                               placeholder="+1 234 567 8900">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-5">
+                            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                                <i class="fas fa-map-marker-alt me-2 text-primary"></i>Address Information
+                            </h5>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Country</label>
+                                    <select name="country" id="id_country" class="form-select">
+                                        <option value="">Select Country</option>
+                                        <option value="us" {% if user.country == "us" %}selected{% endif %}>United States</option>
+                                        <option value="ca" {% if user.country == "ca" %}selected{% endif %}>Canada</option>
+                                        <option value="uk" {% if user.country == "uk" %}selected{% endif %}>United Kingdom</option>
+                                        <option value="au" {% if user.country == "au" %}selected{% endif %}>Australia</option>
+                                        <option value="in" {% if user.country == "in" %}selected{% endif %}>India</option>
+                                        <option value="de" {% if user.country == "de" %}selected{% endif %}>Germany</option>
+                                        <option value="fr" {% if user.country == "fr" %}selected{% endif %}>France</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">State</label>
+                                    <select name="state" id="id_state" class="form-select">
+                                        <option value="">Select State</option>
+                                        <option value="ca" {% if user.state == "ca" %}selected{% endif %}>California</option>
+                                        <option value="ny" {% if user.state == "ny" %}selected{% endif %}>New York</option>
+                                        <option value="tx" {% if user.state == "tx" %}selected{% endif %}>Texas</option>
+                                        <option value="fl" {% if user.state == "fl" %}selected{% endif %}>Florida</option>
+                                        <option value="on" {% if user.state == "on" %}selected{% endif %}>Ontario</option>
+                                        <option value="bc" {% if user.state == "bc" %}selected{% endif %}>British Columbia</option>
+                                        <option value="mh" {% if user.state == "mh" %}selected{% endif %}>Maharashtra</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">District</label>
+                                    <select name="district" id="id_district" class="form-select">
+                                        <option value="">Select District</option>
+                                        <option value="la" {% if user.district == "la" %}selected{% endif %}>Los Angeles</option>
+                                        <option value="sf" {% if user.district == "sf" %}selected{% endif %}>San Francisco</option>
+                                        <option value="nyc" {% if user.district == "nyc" %}selected{% endif %}>New York City</option>
+                                        <option value="hou" {% if user.district == "hou" %}selected{% endif %}>Houston</option>
+                                        <option value="tor" {% if user.district == "tor" %}selected{% endif %}>Toronto</option>
+                                        <option value="van" {% if user.district == "van" %}selected{% endif %}>Vancouver</option>
+                                        <option value="mum" {% if user.district == "mum" %}selected{% endif %}>Mumbai</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-5">
+                            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                                <i class="fas fa-comments me-2 text-primary"></i>Additional Contact
+                            </h5>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Skype ID</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fab fa-skype text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               name="skype_id"
+                                               value="{{ form.skype_id.value|default:user.skype_id }}"
+                                               class="form-control border-start-0"
+                                               maxlength="100"
+                                               id="id_skype_id"
+                                               placeholder="Your Skype ID">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">WhatsApp Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fab fa-whatsapp text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               name="whatsapp_number"
+                                               value="{{ form.whatsapp_number.value|default:user.whatsapp_number }}"
+                                               class="form-control border-start-0"
+                                               maxlength="15"
+                                               id="id_whatsapp_number"
+                                               placeholder="WhatsApp number">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                                <i class="fas fa-lock me-2 text-primary"></i>Change Password
+                            </h5>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Leave these fields blank to keep your current password.
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">New Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-key text-muted"></i>
+                                        </span>
+                                        <input type="password"
+                                               name="password"
+                                               class="form-control border-start-0"
+                                               id="id_password"
+                                               placeholder="Enter new password">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Confirm Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-key text-muted"></i>
+                                        </span>
+                                        <input type="password"
+                                               name="confirm_password"
+                                               class="form-control border-start-0"
+                                               id="id_confirm_password"
+                                               placeholder="Confirm new password">
+                                    </div>
+                                    {% if form.confirm_password.errors %}
+                                        <div class="text-danger small mt-1">{{ form.confirm_password.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="border-top pt-4 mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.form-control, .form-select {
+    border: 1px solid #dee2e6;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    border-radius: 8px;
+}
+
+.border-end-0 {
+    border-right: 0 !important;
+}
+
+.border-start-0 {
+    border-left: 0 !important;
+}
+
+h5.border-bottom {
+    border-color: #e9ecef !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Progress - {{ course.title }} - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-2">Student Progress Analysis</h1>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-book me-2"></i>Course: <strong class="text-primary">{{ course.title }}</strong>
+                    </p>
+                </div>
+                <a href="{% url 'trainer_dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-primary text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-users fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ total_students }}</h2>
+                    <p class="mb-0 opacity-75">Total Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-success text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-check-circle fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ completed_count }}</h2>
+                    <p class="mb-0 opacity-75">Completed Course</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-info text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-chart-line fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ average_progress|floatformat:1 }}%</h2>
+                    <p class="mb-0 opacity-75">Avg Progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-warning text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-clock fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ avg_time_spent|floatformat:0 }}</h2>
+                    <p class="mb-0 opacity-75">Avg Minutes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if student_progress %}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 py-3">
+            <h4 class="fw-bold mb-0">
+                <i class="fas fa-list-alt me-2 text-primary"></i>Detailed Student Progress
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0 ps-4">Student</th>
+                            <th class="border-0">Email</th>
+                            <th class="border-0">Enrolled</th>
+                            <th class="border-0">Progress</th>
+                            <th class="border-0">Videos Completed</th>
+                            <th class="border-0">Time Spent</th>
+                            <th class="border-0">Last Activity</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0 pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for progress in student_progress %}
+                        <tr class="cursor-pointer" onclick="openStudentModal('{{ progress.student.id }}')">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
+                                        <i class="fas fa-user text-white small"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="d-block">{{ progress.student.get_full_name|default:progress.student.username }}</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ progress.student.email }}</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ progress.enrolled_at|date:"M d, Y" }}</small>
+                            </td>
+                            <td style="min-width: 120px;">
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                        <div class="progress-bar {% if progress.progress_percentage == 100 %}bg-success{% else %}bg-primary{% endif %}"
+                                             role="progressbar"
+                                             style="width: {{ progress.progress_percentage }}%">
+                                        </div>
+                                    </div>
+                                    <small class="fw-semibold">{{ progress.progress_percentage|floatformat:0 }}%</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-semibold">{{ progress.completed_videos }}/{{ progress.total_videos }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="fas fa-clock me-1"></i>{{ progress.time_spent }} min
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ progress.last_activity|timesince }} ago</small>
+                            </td>
+                            <td>
+                                {% if progress.completed %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Completed
+                                </span>
+                                {% elif progress.progress_percentage > 0 %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-spinner me-1"></i>In Progress
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-clock me-1"></i>Not Started
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#studentModal{{ progress.student.id }}"
+                                        onclick="event.stopPropagation()">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
+                            </td>
+                        </tr>
+
+
+                        <div class="modal fade" id="studentModal{{ progress.student.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header border-0">
+                                        <h5 class="modal-title fw-bold">Student Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-primary mb-3">
+                                                    <i class="fas fa-user me-2"></i>Personal Information
+                                                </h6>
+                                                <div class="mb-2">
+                                                    <strong>Name:</strong> {{ progress.student.get_full_name|default:progress.student.username }}
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Email:</strong> {{ progress.student.email }}
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Phone:</strong> {{ progress.student.phone|default:"Not provided" }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-primary mb-3">
+                                                    <i class="fas fa-chart-line me-2"></i>Course Progress
+                                                </h6>
+                                                <div class="mb-2">
+                                                    <strong>Enrolled:</strong> {{ progress.enrolled_at|date:"F j, Y" }}
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Progress:</strong>
+                                                    <span class="fw-semibold">{{ progress.progress_percentage|floatformat:1 }}%</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Videos Completed:</strong> {{ progress.completed_videos }}/{{ progress.total_videos }}
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Time Spent:</strong> {{ progress.time_spent }} minutes
+                                                </div>
+                                                <div class="mb-0">
+                                                    <strong>Last Activity:</strong> {{ progress.last_activity|timesince }} ago
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0 py-3">
+            <h4 class="fw-bold mb-0">
+                <i class="fas fa-chart-pie me-2 text-primary"></i>Progress Distribution
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-clock text-white fa-lg"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-secondary">{{ not_started_count|default:0 }}</h3>
+                                    <p class="mb-0 text-muted">Not Started (0%)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-spinner text-white fa-lg"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-warning">{{ in_progress_count|default:0 }}</h3>
+                                    <p class="mb-0 text-muted">In Progress (1-99%)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-check text-white fa-lg"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-success">{{ completed_count }}</h3>
+                                    <p class="mb-0 text-muted">Completed (100%)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-primary text-white h-100">
+                        <div class="card-body text-center d-flex flex-column justify-content-center py-4">
+                            <h2 class="fw-bold mb-2">{{ average_progress|floatformat:1 }}%</h2>
+                            <p class="mb-0 opacity-75">Overall Average Progress</p>
+                            <div class="progress mt-3 bg-white bg-opacity-25" style="height: 6px;">
+                                <div class="progress-bar bg-white" style="width: {{ average_progress }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-4"></i>
+            <h3 class="text-muted mb-3">No Students Enrolled</h3>
+            <p class="text-muted mb-4">This course doesn't have any enrolled students yet.</p>
+            <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">
+                <i class="fas fa-eye me-2"></i>View Course Page
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openStudentModal(studentId) {
+    const modalElement = document.getElementById('studentModal' + studentId);
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tableRows = document.querySelectorAll('tbody tr.cursor-pointer');
+    tableRows.forEach(row => {
+        row.style.cursor = 'pointer';
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+}
+
+.btn-outline-primary {
+    border: 1px solid #667eea;
+    color: #667eea;
+    border-radius: 6px;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.badge {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.cursor-pointer:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

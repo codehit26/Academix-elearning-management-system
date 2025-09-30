@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Courses - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">Course Management</h1>
+                    <p class="text-muted mb-0">Add new courses and manage existing ones</p>
+                </div>
+                <a href="{% url 'manager_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-lg mb-5">
+        <div class="card-header bg-success text-white py-3">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-plus-circle me-2"></i>Add New Course
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label fw-semibold">Course Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label fw-semibold">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_category" class="form-label fw-semibold">Category</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_price" class="form-label fw-semibold">Price ($)</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                                <div class="text-danger small mt-1">{{ form.price.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_trainer" class="form-label fw-semibold">Trainer</label>
+                            {{ form.trainer }}
+                            {% if form.trainer.errors %}
+                                <div class="text-danger small mt-1">{{ form.trainer.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_is_active" class="form-label fw-semibold">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active Course
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                                <div class="text-danger small mt-1">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-success btn-lg px-5">
+                        <i class="fas fa-plus-circle me-2"></i>Add Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-dark text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-book me-2"></i>All Courses ({{ courses.count }})
+                </h3>
+                <span class="badge bg-light text-dark fs-6">{{ courses.count }} courses</span>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if courses %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Course Title</th>
+                                <th>Category</th>
+                                <th>Trainer</th>
+                                <th>Price</th>
+                                <th>Students</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                            <tr>
+                                <td>
+                                    <strong class="text-dark">{{ course.title }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ course.description|truncatewords:10 }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ course.category|default:"General" }}</span>
+                                </td>
+                                <td>
+                                    {% if course.trainer %}
+                                        <span class="badge bg-info">{{ course.trainer.get_full_name|default:course.trainer.username }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">No Trainer</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="text-success">${{ course.price }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ course.studentcourse_set.count }} students</span>
+                                </td>
+                                <td>
+                                    {% if course.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ course.created_at|date:"M d, Y" }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group-vertical btn-group-sm">
+                                        {% if not course.trainer %}
+                                            <a href="{% url 'assign_trainer' course.id %}" class="btn btn-warning mb-1">
+                                                <i class="fas fa-user-tie me-1"></i>Assign Trainer
+                                            </a>
+                                        {% else %}
+                                            <button class="btn btn-outline-secondary mb-1" disabled>
+                                                Trainer Assigned
+                                            </button>
+                                        {% endif %}
+                                        <button class="btn btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#courseModal{{ course.id }}">
+                                            <i class="fas fa-eye me-1"></i>Details
+                                        </button>
+                                    </div>
+
+                                    <!-- Course Details Modal -->
+                                    <div class="modal fade" id="courseModal{{ course.id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-dark text-white">
+                                                    <h5 class="modal-title">Course Details - {{ course.title }}</h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Course Information</h6>
+                                                            <p><strong>Title:</strong> {{ course.title }}</p>
+                                                            <p><strong>Description:</strong> {{ course.description }}</p>
+                                                            <p><strong>Category:</strong> {{ course.category|default:"General" }}</p>
+                                                            <p><strong>Price:</strong> ${{ course.price }}</p>
+                                                            <p><strong>Status:</strong>
+                                                                {% if course.is_active %}
+                                                                    <span class="badge bg-success">Active</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger">Inactive</span>
+                                                                {% endif %}
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Statistics</h6>
+                                                            <p><strong>Trainer:</strong>
+                                                                {% if course.trainer %}
+                                                                    {{ course.trainer.get_full_name|default:course.trainer.username }}
+                                                                {% else %}
+                                                                    <span class="text-warning">Not assigned</span>
+                                                                {% endif %}
+                                                            </p>
+                                                            <p><strong>Total Students:</strong> {{ course.studentcourse_set.count }}</p>
+                                                            <p><strong>Total Videos:</strong> {{ course.videos.count }}</p>
+                                                            <p><strong>Created:</strong> {{ course.created_at|date:"F j, Y" }}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {% if course.studentcourse_set.exists %}
+                                                    <div class="mt-4">
+                                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Enrolled Students</h6>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Student Name</th>
+                                                                        <th>Email</th>
+                                                                        <th>Enrolled</th>
+                                                                        <th>Status</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for enrollment in course.studentcourse_set.all %}
+                                                                    <tr>
+                                                                        <td>{{ enrollment.student.get_full_name|default:enrollment.student.username }}</td>
+                                                                        <td>{{ enrollment.student.email }}</td>
+                                                                        <td>{{ enrollment.enrolled_at|date:"M d, Y" }}</td>
+                                                                        <td>
+                                                                            {% if enrollment.completed %}
+                                                                                <span class="badge bg-success">Completed</span>
+                                                                            {% else %}
+                                                                                <span class="badge bg-warning">In Progress</span>
+                                                                            {% endif %}
+                                                                        </td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    {% if not course.trainer %}
+                                                        <a href="{% url 'assign_trainer' course.id %}" class="btn btn-warning">
+                                                            <i class="fas fa-user-tie me-1"></i>Assign Trainer
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="fas fa-book text-muted fa-3x"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No Courses Found</h4>
+                    <p class="text-muted">There are no courses in the system yet. Add your first course above.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-info text-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-bolt me-2"></i>Quick Actions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{% url 'manager_dashboard' %}" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-tachometer-alt me-2"></i>Back to Dashboard
+                </a>
+                <a href="{% url 'manage_trainers' %}" class="btn btn-outline-warning me-2">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Manage Trainers
+                </a>
+                <a href="{% url 'manage_payments' %}" class="btn btn-outline-success">
+                    <i class="fas fa-credit-card me-2"></i>Manage Payments
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-group-vertical .btn {
+    border-radius: 6px;
+    margin-bottom: 0.25rem;
+}
+
+.form-control,
+.form-select,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select,
+#id_title,
+#id_description,
+#id_category,
+#id_price,
+#id_trainer {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+}
+
+.form-control:focus,
+.form-select:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus,
+#id_title:focus,
+#id_description:focus,
+#id_category:focus,
+#id_price:focus,
+#id_trainer:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+</style>
+{% endblock %}

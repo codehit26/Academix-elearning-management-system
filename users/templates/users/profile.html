@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile - Academix{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-4" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                                <div>
+                                    <h1 class="h3 fw-bold text-dark mb-1">{{ user.get_full_name|default:user.username }}</h1>
+                                    <p class="text-muted mb-2">
+                                        <span class="badge bg-primary">{{ user.get_user_type_display }}</span>
+                                        <span class="ms-2">Member since {{ user.date_joined|date:"F Y" }}</span>
+                                    </p>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-envelope me-1"></i>{{ user.email }}
+                                        {% if user.phone %}
+                                        <span class="ms-3"><i class="fas fa-phone me-1"></i>{{ user.phone }}</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a href="{% url 'update_profile' %}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                        <i class="fas
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
+                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                            {% else %}fa-info-circle{% endif %} me-2">
+                        </i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light border-0 py-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-user-circle me-2 text-primary"></i>Personal Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">Username</label>
+                                <p class="fw-semibold mb-2">{{ user.username }}</p>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small mb-1">First Name</label>
+                                    <p class="fw-semibold mb-2">{{ user.first_name|default:"Not provided" }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small mb-1">Last Name</label>
+                                    <p class="fw-semibold mb-2">{{ user.last_name|default:"Not provided" }}</p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">Phone Number</label>
+                                <p class="fw-semibold mb-0">
+                                    {% if user.phone %}
+                                        <i class="fas fa-phone text-muted me-1"></i>{{ user.phone }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light border-0 py-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>Account Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small mb-1">User Type</label>
+                                    <p class="mb-2">
+                                        <span class="badge bg-primary">{{ user.get_user_type_display }}</span>
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small mb-1">Joined Date</label>
+                                    <p class="fw-semibold mb-2">
+                                        <i class="fas fa-calendar text-muted me-1"></i>
+                                        {{ user.date_joined|date:"M d, Y" }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">Last Login</label>
+                                <p class="fw-semibold mb-0">
+                                    <i class="fas fa-sign-in-alt text-muted me-1"></i>
+                                    {{ user.last_login|date:"M d, Y H:i"|default:"Never" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light border-0 py-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-comments me-2 text-primary"></i>Contact Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">Email Address</label>
+                                <p class="fw-semibold mb-2">
+                                    <i class="fas fa-envelope text-muted me-1"></i>{{ user.email }}
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">Skype ID</label>
+                                <p class="fw-semibold mb-2">
+                                    {% if user.skype_id %}
+                                        <i class="fab fa-skype text-primary me-1"></i>{{ user.skype_id }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label text-muted small mb-1">WhatsApp Number</label>
+                                <p class="fw-semibold mb-0">
+                                    {% if user.whatsapp_number %}
+                                        <i class="fab fa-whatsapp text-success me-1"></i>{{ user.whatsapp_number }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-light border-0 py-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-map-marker-alt me-2 text-primary"></i>Location Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">Country</label>
+                                <p class="fw-semibold mb-2">
+                                    {% if user.country.name %}
+                                        <i class="fas fa-globe text-muted me-1"></i>{{ user.country.name }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small mb-1">State</label>
+                                <p class="fw-semibold mb-2">{{ user.state.name|default:"Not provided" }}</p>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label text-muted small mb-1">District</label>
+                                <p class="fw-semibold mb-0">{{ user.district.name|default:"Not provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light border-0 py-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-bolt me-2 text-primary"></i>Quick Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    <a href="{% url 'course_list' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-book me-2"></i>Browse Courses
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    {% if user.user_type == 'student' and enrolled_courses %}
+                                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-play-circle me-2"></i>Continue Learning
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'course_list' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-search me-2"></i>Find Courses
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {% if user.user_type == 'student' and enrolled_courses %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light border-0 py-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line me-2 text-primary"></i>Learning Progress
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for enrollment in enrolled_courses %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="border rounded p-3 h-100">
+                                        <h6 class="fw-bold mb-2 text-truncate">{{ enrollment.course.title }}</h6>
+                                        <div class="progress mb-2" style="height: 6px;">
+                                            <div class="progress-bar bg-primary" style="width: {{ enrollment.progress_percentage }}%"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">{{ enrollment.progress_percentage }}% complete</small>
+                                            <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-sm btn-primary">Continue</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 10px;
+}
+
+.card-header {
+    background-color: #f8f9fa !important;
+}
+
+.progress {
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 6px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+}
+
+.btn-outline-primary {
+    border: 1px solid #667eea;
+    color: #667eea;
+    border-radius: 6px;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.form-label {
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

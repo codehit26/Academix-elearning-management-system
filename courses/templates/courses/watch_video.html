@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ video.title }} - {{ video.course.title }} - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'course_list' %}" class="text-decoration-none">Courses</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'course_detail' video.course.id %}" class="text-decoration-none">{{ video.course.title }}</a></li>
+                    <li class="breadcrumb-item active">{{ video.title|truncatewords:4 }}</li>
+                </ol>
+            </nav>
+
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-0">
+                    {% if video.video_file %}
+
+                    <div class="video-container">
+                        <video id="mainVideoPlayer" controls width="100%" height="auto" class="w-100">
+                            <source src="{{ video.video_file.url }}" type="video/mp4">
+                            <source src="{{ video.video_file.url }}" type="video/webm">
+                            <source src="{{ video.video_file.url }}" type="video/ogg">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h4 fw-bold text-dark mb-0">{{ video.title }}</h2>
+                            <span class="badge bg-primary">{{ video.duration }} min</span>
+                        </div>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-book me-1"></i>Course: {{ video.course.title }}
+                        </p>
+                        <div class="video-info">
+                            <small class="text-muted">
+                                <i class="fas fa-file-video me-1"></i>{{ video.video_file.name }}
+                            </small>
+                        </div>
+                    </div>
+                    {% else %}
+
+                    <div class="bg-dark text-center text-white p-5">
+                        <i class="fas fa-video fa-4x mb-3 opacity-50"></i>
+                        <h4 class="mb-2">Video Content</h4>
+                        <p class="mb-3"><strong>{{ video.title }}</strong></p>
+                        <p class="mb-4">Duration: {{ video.duration }} minutes</p>
+                        <div class="alert alert-warning mx-auto" style="max-width: 500px;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note:</strong> Video file not uploaded yet.
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>Description
+                    </h4>
+                    <p class="mb-0">{{ video.description|default:"No description available for this video." }}</p>
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if progress.completed %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-check-circle me-1"></i>Completed
+                            </span>
+                            {% else %}
+                            <form method="post" class="mb-0">
+                                {% csrf_token %}
+                                <button type="submit" name="completed" class="btn btn-success">
+                                    <i class="fas fa-check-circle me-2"></i>Mark as Completed
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if next_video %}
+                            <a href="{% url 'watch_video' next_video.id %}" class="btn btn-primary">
+                                Next Video <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'course_detail' video.course.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Course
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-star me-2 text-primary"></i>Rate this Video
+                    </h4>
+                    <form method="post" action="{% url 'rate_video' video.id %}">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Rating</label>
+                                <select name="rating" class="form-select" required>
+                                    <option value="">Select your rating</option>
+                                    <option value="5">★★★★★ - Excellent</option>
+                                    <option value="4">★★★★ - Very Good</option>
+                                    <option value="3">★★★ - Good</option>
+                                    <option value="2">★★ - Fair</option>
+                                    <option value="1">★ - Poor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Comment (optional)</label>
+                                <textarea name="comment" class="form-control" rows="3" placeholder="Share your thoughts about this video..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Rating
+                        </button>
+                    </form>
+
+                    {% if ratings %}
+                    <div class="mt-4">
+                        <h5 class="fw-bold text-dark mb-3">Student Ratings</h5>
+                        <div class="row g-3">
+                            {% for rating in ratings %}
+                            <div class="col-12">
+                                <div class="border-start border-3 border-primary ps-3 py-2">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <strong>{{ rating.student.username }}</strong>
+                                        <span class="text-warning">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= rating.rating %}★{% else %}☆{% endif %}
+                                            {% endfor %}
+                                        </span>
+                                    </div>
+                                    {% if rating.comment %}
+                                    <p class="mb-0 text-muted">{{ rating.comment }}</p>
+                                    {% endif %}
+                                    <small class="text-muted">{{ rating.created_at|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-play-circle me-2 text-primary"></i>Course Videos
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for v in video.course.videos.all %}
+                        <a href="{% url 'watch_video' v.id %}"
+                           class="list-group-item list-group-item-action border-0 py-3 {% if v.id == video.id %}bg-light{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-{% if v.id == video.id %}primary{% else %}light{% endif %} rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 32px; height: 32px;">
+                                        <i class="fas fa-play text-{% if v.id == video.id %}white{% else %}dark{% endif %} small"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold {% if v.id == video.id %}text-primary{% endif %}">{{ v.title }}</h6>
+                                        <small class="text-muted">{{ v.duration }} min</small>
+                                    </div>
+                                </div>
+                                {% if v.id == video.id %}
+                                <span class="badge bg-primary">Current</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Your Progress
+                    </h6>
+                    {% if completed_videos and total_videos %}
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar"
+                             style="width: {{ progress_percentage }}%">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">{{ progress_percentage|floatformat:1 }}%</span>
+                        <span class="text-muted small">{{ completed_videos }}/{{ total_videos }} videos</span>
+                    </div>
+                    {% else %}
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">0%</span>
+                        <span class="text-muted small">0/{{ total_videos }} videos</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>Course Info
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Instructor</span>
+                        <strong>{{ video.course.trainer.get_full_name|default:video.course.trainer.username }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Category</span>
+                        <span class="badge bg-light text-dark">{{ video.course.category.name }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Total Duration</span>
+                        <strong>{{ video.course.duration }} hours</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if video.video_file %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('mainVideoPlayer');
+
+    if (video) {
+
+        video.addEventListener('ended', function() {
+
+            console.log('Video completed - ready to mark as completed');
+
+            /*
+            const form = document.querySelector('form[method="post"]');
+            if (form && !document.querySelector('.badge.bg-success')) {
+                form.submit();
+            }
+            */
+        });
+
+
+        video.addEventListener('timeupdate', function() {
+            const percent = (video.currentTime / video.duration) * 100;
+
+            if (percent > 90) {
+                console.log('Video almost completed');
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.video-container {
+    background: #000;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    border-radius: 8px;
+}
+
+.list-group-item {
+    border-radius: 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Courses - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-2">Course Management</h1>
+                    <p class="text-muted mb-0">Manage all courses, trainers, and course content</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    <i class="fas fa-plus me-2"></i>Add New Course
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-primary text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-book fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ total_courses }}</h2>
+                    <p class="mb-0 opacity-75">Total Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-success text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-chalkboard-teacher fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ active_trainers }}</h2>
+                    <p class="mb-0 opacity-75">Active Trainers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-info text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-play-circle fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ total_videos }}</h2>
+                    <p class="mb-0 opacity-75">Total Videos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 d-flex">
+            <div class="card border-0 bg-warning text-white shadow-sm w-100">
+                <div class="card-body text-center py-4 d-flex flex-column justify-content-center">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2 opacity-75"></i>
+                    <h2 class="fw-bold mb-1">{{ courses_without_trainers }}</h2>
+                    <p class="mb-0 opacity-75">Need Trainers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="fw-bold mb-0">
+                    <i class="fas fa-list me-2 text-primary"></i>All Courses
+                </h4>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control form-control-sm" placeholder="Search courses..." style="min-width: 200px;">
+                    <select class="form-select form-select-sm" style="min-width: 150px;">
+                        <option>All Categories</option>
+                        <option>Web Development</option>
+                        <option>Data Science</option>
+                        <option>Design</option>
+                        <option>Business</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0 ps-4">Course</th>
+                            <th class="border-0">Category</th>
+                            <th class="border-0">Trainer</th>
+                            <th class="border-0">Price</th>
+                            <th class="border-0">Duration</th>
+                            <th class="border-0">Videos</th>
+                            <th class="border-0">Students</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0 pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-book text-white"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="d-block">{{ course.title }}</strong>
+                                        <small class="text-muted">{{ course.description|truncatewords:5 }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ course.category.name }}</span>
+                            </td>
+                            <td>
+                                {% if course.trainer %}
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="fas fa-user text-white small"></i>
+                                    </div>
+                                    <span>{{ course.trainer.get_full_name|default:course.trainer.username }}</span>
+                                </div>
+                                {% else %}
+                                <span class="badge bg-warning">No Trainer</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-success">${{ course.price }}</strong>
+                            </td>
+                            <td>
+                                <span class="text-muted">{{ course.duration }}h</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info text-white">{{ course.videos.count }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ course.student_count }}</span>
+                            </td>
+                            <td>
+                                {% if course.is_active %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Active
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-pause me-1"></i>Inactive
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'course_detail' course.id %}">
+                                                <i class="fas fa-eye me-2"></i>View
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ course.id }}">
+                                                <i class="fas fa-edit me-2"></i>Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            {% if course.trainer %}
+                                            <a class="dropdown-item text-muted" href="#">
+                                                <i class="fas fa-user me-2"></i>Trainer Assigned
+                                            </a>
+                                            {% else %}
+                                            <a class="dropdown-item" href="{% url 'assign_trainer' course.id %}">
+                                                <i class="fas fa-user-plus me-2"></i>Assign Trainer
+                                            </a>
+                                            {% endif %}
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            {% if course.is_active %}
+                                            <a class="dropdown-item text-warning" href="#">
+                                                <i class="fas fa-pause me-2"></i>Deactivate
+                                            </a>
+                                            {% else %}
+                                            <a class="dropdown-item text-success" href="#">
+                                                <i class="fas fa-play me-2"></i>Activate
+                                            </a>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Courses Found</h5>
+                                <p class="text-muted">Get started by creating your first course.</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                                    <i class="fas fa-plus me-2"></i>Add New Course
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    {% if courses_without_trainers > 0 %}
+    <div class="card border-0 shadow-sm mt-4 border-warning">
+        <div class="card-header bg-transparent border-warning py-3">
+            <h5 class="fw-bold mb-0 text-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>Courses Needing Trainers
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {% for course in courses %}
+                {% if not course.trainer %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-warning h-100">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold">{{ course.title }}</h6>
+                            <p class="card-text text-muted small mb-2">{{ course.description|truncatewords:10 }}</p>
+                            <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                                <span>{{ course.duration }}h • {{ course.videos.count }} videos</span>
+                                <span class="text-success fw-bold">${{ course.price }}</span>
+                            </div>
+                            <a href="{% url 'assign_trainer' course.id %}" class="btn btn-warning btn-sm w-100">
+                                <i class="fas fa-user-plus me-2"></i>Assign Trainer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<div class="modal fade" id="addCourseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Add New Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Course Title</label>
+                            <input type="text" class="form-control" placeholder="Enter course title" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Category</label>
+                            <select class="form-select" required>
+                                <option value="">Select Category</option>
+                                <option value="web">Web Development</option>
+                                <option value="data">Data Science</option>
+                                <option value="design">Design</option>
+                                <option value="business">Business</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea class="form-control" rows="3" placeholder="Enter course description" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Price ($)</label>
+                            <input type="number" class="form-control" placeholder="0.00" step="0.01" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Duration (hours)</label>
+                            <input type="number" class="form-control" placeholder="Total hours" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Trainer</label>
+                            <select class="form-select">
+                                <option value="">Select Trainer</option>
+                                <option value="1">John Doe</option>
+                                <option value="2">Jane Smith</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Create Course</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+    border-color: #5a6fd8;
+}
+
+.btn-outline-primary {
+    border: 1px solid #667eea;
+    color: #667eea;
+    border-radius: 6px;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.badge {
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+.dropdown-menu {
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Feedbacks - Academix{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">Student Feedbacks</h1>
+                    <p class="text-muted mb-0">Analyze student feedback and ratings</p>
+                </div>
+                <a href="{% url 'manager_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mb-5">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted text-uppercase small">Total Feedbacks</h6>
+                            <h2 class="text-primary mb-0">{{ total_feedbacks }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-chart-line me-1"></i>All Ratings
+                            </small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-comments text-primary fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted text-uppercase small">Video Ratings</h6>
+                            <h2 class="text-info mb-0">{{ video_ratings.count }}</h2>
+                            <small class="text-muted">Course content</small>
+                        </div>
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-video text-info fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted text-uppercase small">Trainer Ratings</h6>
+                            <h2 class="text-warning mb-0">{{ trainer_ratings.count }}</h2>
+                            <small class="text-muted">Instructor feedback</small>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-chalkboard-teacher text-warning fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted text-uppercase small">Avg Rating</h6>
+                            <h2 class="text-success mb-0">{{ video_avg_rating|floatformat:1 }}/5.0</h2>
+                            <small class="text-success">
+                                <i class="fas fa-star me-1"></i>Overall
+                            </small>
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-star text-success fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-lg mb-5">
+        <div class="card-header bg-dark text-white py-3">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Rating Distribution
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for rating, counts in rating_distribution.items %}
+                <div class="col-md-2 col-6 mb-4">
+                    <div class="text-center">
+                        <div class="mb-2">
+                            <span class="text-warning fs-4">
+                                {% with ''|center:rating as range %}
+                                {% for _ in range %}★{% endfor %}
+                                {% endwith %}
+                            </span>
+                        </div>
+                        <div class="progress mb-2" style="height: 12px;">
+                            <div class="progress-bar bg-warning"
+                                 style="width: {% widthratio counts.video_count video_ratings.count 100 %}%">
+                            </div>
+                        </div>
+                        <div class="small text-muted">
+                            <div>Videos: {{ counts.video_count }}</div>
+                            <div>Trainers: {{ counts.trainer_count }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-lg mb-5">
+        <div class="card-header bg-info text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-video me-2"></i>Video Feedbacks
+                </h3>
+                <span class="badge bg-light text-dark fs-6">{{ video_ratings.count }} rating{{ video_ratings.count|pluralize }}</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if video_ratings %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">Student</th>
+                                <th>Video & Course</th>
+                                <th>Rating</th>
+                                <th>Comment</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rating in video_ratings %}
+                            <tr class="border-bottom">
+                                <td class="px-4">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                <i class="fas fa-user text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-bold text-dark">{{ rating.student.get_full_name|default:rating.student.username }}</h6>
+                                            <small class="text-muted">{{ rating.student.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 fw-bold text-dark">{{ rating.video.title }}</h6>
+                                    <small class="text-muted">Course: {{ rating.video.course.title }}</small>
+                                </td>
+                                <td>
+                                    <div class="text-warning mb-1">
+                                        {% with ''|center:rating.rating as range %}
+                                        {% for _ in range %}★{% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                    <small class="text-muted">({{ rating.rating }}/5)</small>
+                                </td>
+                                <td>
+                                    {% if rating.comment %}
+                                        <p class="mb-0 text-dark small">{{ rating.comment|truncatewords:8 }}</p>
+                                    {% else %}
+                                        <span class="text-muted small">No comment</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button class="btn btn-outline-primary btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#videoFeedbackModal{{ rating.id }}"
+                                                data-bs-toggle="tooltip"
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+
+                            <div class="modal fade" id="videoFeedbackModal{{ rating.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title">
+                                                <i class="fas fa-video me-2"></i>Video Feedback Details
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Student Information</h6>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Name</label>
+                                                        <p class="fw-bold text-dark">{{ rating.student.get_full_name|default:rating.student.username }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Email</label>
+                                                        <p class="text-dark">{{ rating.student.email }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Video Information</h6>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Video Title</label>
+                                                        <p class="fw-bold text-dark">{{ rating.video.title }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Course</label>
+                                                        <p class="text-dark">{{ rating.video.course.title }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Trainer</label>
+                                                        <p class="text-dark">{{ rating.video.course.trainer.get_full_name|default:rating.video.course.trainer.username|default:"Not assigned" }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="border-top pt-4 mt-3">
+                                                <h6 class="text-uppercase text-muted small fw-bold mb-3">Feedback Details</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label small text-muted mb-1">Rating</label>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="text-warning fs-5 me-2">
+                                                                    {% with ''|center:rating.rating as range %}
+                                                                    {% for _ in range %}★{% endfor %}
+                                                                    {% endwith %}
+                                                                </span>
+                                                                <span class="fw-bold text-dark">({{ rating.rating }}/5)</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label small text-muted mb-1">Submitted</label>
+                                                            <p class="text-dark">{{ rating.created_at|date:"F j, Y, g:i a" }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small text-muted mb-1">Comment</label>
+                                                    <div class="card bg-light border-0">
+                                                        <div class="card-body">
+                                                            {% if rating.comment %}
+                                                                <p class="mb-0 text-dark">{{ rating.comment }}</p>
+                                                            {% else %}
+                                                                <p class="mb-0 text-muted">No comment provided</p>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="fas fa-video text-muted fa-3x"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No Video Feedbacks</h4>
+                    <p class="text-muted">No students have rated videos yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-warning text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Trainer Feedbacks
+                </h3>
+                <span class="badge bg-light text-dark fs-6">{{ trainer_ratings.count }} rating{{ trainer_ratings.count|pluralize }}</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if trainer_ratings %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">Student</th>
+                                <th>Trainer</th>
+                                <th>Rating</th>
+                                <th>Comment</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rating in trainer_ratings %}
+                            <tr class="border-bottom">
+                                <td class="px-4">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                <i class="fas fa-user text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-bold text-dark">{{ rating.student.get_full_name|default:rating.student.username }}</h6>
+                                            <small class="text-muted">{{ rating.student.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 fw-bold text-dark">{{ rating.trainer.get_full_name|default:rating.trainer.username }}</h6>
+                                    <small class="text-muted">@{{ rating.trainer.username }}</small>
+                                </td>
+                                <td>
+                                    <div class="text-warning mb-1">
+                                        {% with ''|center:rating.rating as range %}
+                                        {% for _ in range %}★{% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                    <small class="text-muted">({{ rating.rating }}/5)</small>
+                                </td>
+                                <td>
+                                    {% if rating.comment %}
+                                        <p class="mb-0 text-dark small">{{ rating.comment|truncatewords:8 }}</p>
+                                    {% else %}
+                                        <span class="text-muted small">No comment</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <button class="btn btn-outline-primary btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#trainerFeedbackModal{{ rating.id }}"
+                                                data-bs-toggle="tooltip"
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Trainer Feedback Modal -->
+                            <div class="modal fade" id="trainerFeedbackModal{{ rating.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title">
+                                                <i class="fas fa-chalkboard-teacher me-2"></i>Trainer Feedback Details
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Student Information</h6>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Name</label>
+                                                        <p class="fw-bold text-dark">{{ rating.student.get_full_name|default:rating.student.username }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Email</label>
+                                                        <p class="text-dark">{{ rating.student.email }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Trainer Information</h6>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Name</label>
+                                                        <p class="fw-bold text-dark">{{ rating.trainer.get_full_name|default:rating.trainer.username }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Username</label>
+                                                        <p class="text-dark">@{{ rating.trainer.username }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small text-muted mb-1">Email</label>
+                                                        <p class="text-dark">{{ rating.trainer.email }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="border-top pt-4 mt-3">
+                                                <h6 class="text-uppercase text-muted small fw-bold mb-3">Feedback Details</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label small text-muted mb-1">Rating</label>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="text-warning fs-5 me-2">
+                                                                    {% with ''|center:rating.rating as range %}
+                                                                    {% for _ in range %}★{% endfor %}
+                                                                    {% endwith %}
+                                                                </span>
+                                                                <span class="fw-bold text-dark">({{ rating.rating }}/5)</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label small text-muted mb-1">Submitted</label>
+                                                            <p class="text-dark">{{ rating.created_at|date:"F j, Y, g:i a" }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small text-muted mb-1">Comment</label>
+                                                    <div class="card bg-light border-0">
+                                                        <div class="card-body">
+                                                            {% if rating.comment %}
+                                                                <p class="mb-0 text-dark">{{ rating.comment }}</p>
+                                                            {% else %}
+                                                                <p class="mb-0 text-muted">No comment provided</p>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="fas fa-chalkboard-teacher text-muted fa-3x"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No Trainer Feedbacks</h4>
+                    <p class="text-muted">No students have rated trainers yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.progress {
+    border-radius: 6px;
+}
+</style>
+
+<script>
+
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+});
+</script>
+{% endblock %}
